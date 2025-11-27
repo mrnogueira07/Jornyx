@@ -1,45 +1,605 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jornyx – Formulário Feira RH</title>
-    <meta name="description" content="Formulário para captação de leads.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body {
-        background-color: #151517;
-        color: #e5e7eb;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      }
-      /* Custom scrollbar for dark theme */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1f1f1f; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #4b5563; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #6b7280; 
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jornyx – Formulário Feira RH</title>
+  <meta name="description" content="Formulário para captação de leads com LGPD.">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      background-color: #151517;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    /* Custom scrollbar for dark theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1f1f1f; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4b5563; 
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6b7280; 
+    }
+    
+    .animate-slide-in {
+      animation: slideIn 0.4s ease-out forwards;
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- ICONS (Inline SVGs to remove external dependencies) ---
+    const Icons = {
+      CheckCircle2: ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      ),
+      RotateCcw: ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      ),
+      ShieldCheck: ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+      ),
+      Download: ({ size, className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      ),
+      ChevronUp: ({ size, className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m18 15-6-6-6 6"/></svg>
+      ),
+      ChevronDown: ({ size, className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>
+      ),
+      List: ({ size, className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+      )
+    };
+
+    // --- CONSTANTS ---
+    const STEPS = [
+      {
+        id: 'frequencia',
+        type: 'radio',
+        question: 'Com que frequência você recruta ou participa de processos seletivos?',
+        sub: 'Isso nos ajuda a entender sua rotina.',
+        options: [
+          'Sempre',
+          'Às vezes',
+          'Raramente'
+        ]
+      },
+      {
+        id: 'dor',
+        type: 'radio',
+        question: 'Qual dessas dores mais te incomoda hoje em recrutamento?',
+        options: [
+          'Volume alto de currículos ruins',
+          'Poucos candidatos qualificados',
+          'Falta de fit cultural',
+          'Processo muito manual',
+          'Outro'
+        ]
+      },
+      {
+        id: 'ranking',
+        type: 'radio',
+        question: 'Se a Jornyx entregar um ranking automático com os 3 melhores candidatos, isso ajuda?',
+        options: [
+          'Sim, com certeza',
+          'Talvez, preciso ver',
+          'Não vejo valor'
+        ]
+      },
+      {
+        id: 'nome',
+        type: 'text',
+        question: 'Qual o primeiro nome da pessoa responsável pelo recrutamento?',
+        placeholder: 'Ex.: Ana, Bruno, Carla...',
+        sub: 'Para personalizarmos o contato.'
+      },
+      {
+        id: 'whatsapp',
+        type: 'tel',
+        question: 'Qual é o WhatsApp para contato?',
+        placeholder: '(DDD) 99999-9999',
+        sub: 'Prometemos não mandar spam.'
+      },
+      {
+        id: 'email',
+        type: 'email',
+        question: 'Qual é o melhor e-mail para falar sobre a Jornyx?',
+        placeholder: 'email@empresa.com'
+      }
+    ];
+
+    const STORAGE_KEY = 'jornyx_respostas_v1';
+
+    // --- UI COMPONENTS ---
+    
+    const Button = ({ variant = 'primary', className = '', children, ...props }) => {
+      const baseStyles = "inline-flex items-center justify-center gap-2 transition-all duration-200 ease-out font-medium touch-manipulation focus:outline-none";
+      
+      const variants = {
+        primary: "bg-orange-500 text-[#111] hover:bg-orange-400 active:transform active:scale-95 shadow-lg shadow-orange-500/20 rounded-full px-6 py-3 text-base",
+        ghost: "bg-transparent text-gray-300 border border-gray-600 hover:bg-white/5 hover:text-white hover:border-gray-500 rounded-full px-6 py-3 text-base",
+        small: "bg-transparent text-gray-300 border border-gray-700 hover:bg-white/10 hover:text-white rounded-full px-3 py-1 text-xs"
+      };
+
+      const disabledStyles = "opacity-50 cursor-not-allowed shadow-none active:scale-100";
+      const variantClass = variants[variant] || variants.primary;
+
+      return (
+        <button 
+          className={`${baseStyles} ${variantClass} ${props.disabled ? disabledStyles : ''} ${className}`}
+          {...props}
+        >
+          {children}
+        </button>
+      );
+    };
+
+    const RadioOption = ({ id, name, value, checked, onChange, label }) => {
+      return (
+        <div className="relative w-full group">
+          <input
+            type="radio"
+            name={name}
+            id={id}
+            value={value}
+            checked={checked}
+            onChange={() => onChange(value)}
+            className="peer sr-only"
+          />
+          <label
+            htmlFor={id}
+            className={`
+              flex items-center gap-3 w-full p-4 rounded-full border cursor-pointer transition-all duration-200
+              bg-white/5 text-gray-100
+              hover:bg-white/10
+              peer-checked:border-orange-500 peer-checked:bg-gradient-to-r peer-checked:from-orange-500/20 peer-checked:to-transparent
+              peer-checked:shadow-[0_0_0_1px_rgba(249,115,22,0.6)]
+              ${checked ? 'border-orange-500' : 'border-neutral-700'}
+            `}
+          >
+            <div className={`
+              w-5 h-5 rounded-full border-2 flex-shrink-0 box-border transition-all duration-200
+              ${checked ? 'border-orange-500 shadow-[inset_0_0_0_4px_#f97316]' : 'border-gray-500 bg-transparent'}
+            `}></div>
+            <span className="text-base font-normal">{label}</span>
+          </label>
+        </div>
+      );
+    };
+
+    const TextInput = ({ label, className = '', ...props }) => {
+      return (
+        <div className="flex flex-col gap-2 w-full">
+          {label && <label className="text-sm text-gray-400 ml-1">{label}</label>}
+          <input
+            className={`
+              w-full px-5 py-4 rounded-2xl border bg-white/5 text-gray-100 text-lg placeholder-gray-500 outline-none
+              border-neutral-700
+              focus:border-orange-500 focus:bg-[#0f0f0f] focus:shadow-[0_0_0_1px_rgba(249,115,22,0.5)]
+              transition-all duration-200
+              ${className}
+            `}
+            {...props}
+          />
+        </div>
+      );
+    };
+
+    // --- RESPONSES DRAWER ---
+
+    const ResponsesDrawer = ({ submissions, steps }) => {
+      const [isOpen, setIsOpen] = useState(false);
+
+      const toggleDrawer = () => setIsOpen(!isOpen);
+
+      const exportCSV = () => {
+        if (submissions.length === 0) return;
+
+        // Create Headers
+        const headers = [
+          'Timestamp',
+          'Data',
+          'Hora',
+          ...steps.map(s => `"${s.question}"`)
+        ];
+
+        // Create Rows
+        const rows = submissions.map(sub => {
+          const dateObj = new Date(sub.timestamp);
+          const dateStr = dateObj.toLocaleDateString('pt-BR');
+          const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+          const stepValues = steps.map(step => {
+            const val = sub[step.id] || '';
+            // Escape quotes and wrap in quotes for CSV safety
+            return `"${val.replace(/"/g, '""')}"`;
+          });
+
+          return [sub.timestamp, dateStr, timeStr, ...stepValues].join(';');
+        });
+
+        const csvContent = [headers.join(';'), ...rows].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        link.setAttribute('download', `jornyx_leads_${timestamp}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+
+      return (
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
+          <div className="w-full max-w-5xl px-4 pointer-events-auto">
+            {/* Handle / Toggle Button */}
+            <button
+              onClick={toggleDrawer}
+              className="mx-auto flex items-center justify-center gap-2 bg-[#1f1f1f] border border-b-0 border-gray-700 text-gray-200 px-6 py-3 rounded-t-2xl shadow-2xl w-full sm:w-96 cursor-pointer hover:bg-[#2a2a2a] transition-colors"
+            >
+              {isOpen ? <Icons.ChevronDown size={18} /> : <Icons.ChevronUp size={18} />}
+              <span className="font-medium text-sm tracking-wide uppercase">Respostas ({submissions.length})</span>
+            </button>
+
+            {/* Drawer Content */}
+            <div 
+              className={`
+                bg-[#0a0a0a] border-x border-t border-gray-800 rounded-t-xl shadow-[0_-10px_40px_rgba(0,0,0,0.8)]
+                overflow-hidden transition-all duration-300 ease-in-out w-full
+                ${isOpen ? 'max-h-[60vh] opacity-100' : 'max-h-0 opacity-0'}
+              `}
+            >
+              <div className="p-4 sm:p-6 flex flex-col gap-4 h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                  <div>
+                    <h3 className="text-gray-200 font-semibold">Respostas Coletadas</h3>
+                    <p className="text-xs text-gray-500 mt-1">Armazenado localmente neste navegador</p>
+                  </div>
+                  <Button variant="small" onClick={exportCSV} disabled={submissions.length === 0}>
+                    <span className="flex items-center gap-2">
+                      <Icons.Download size={14} />
+                      Exportar CSV
+                    </span>
+                  </Button>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-auto flex-1 min-h-0 relative">
+                  {submissions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-32 text-gray-500 gap-2">
+                      <Icons.List size={24} className="opacity-50" />
+                      <span className="text-sm">Nenhuma resposta registrada ainda.</span>
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-xs sm:text-sm text-gray-400">
+                      <thead className="text-xs uppercase bg-[#151515] text-gray-500 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">Data</th>
+                          {steps.slice(3).map(s => (
+                            <th key={s.id} className="px-4 py-3 font-medium whitespace-nowrap">{s.id}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-800">
+                        {submissions.map((sub, idx) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              {new Date(sub.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </td>
+                            {steps.slice(3).map(s => (
+                              <td key={s.id} className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                {sub[s.id]}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // --- MAIN APP ---
+
+    const App = () => {
+      // State
+      const [currentStepIndex, setCurrentStepIndex] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [submissions, setSubmissions] = useState([]);
+      const [isSuccess, setIsSuccess] = useState(false);
+      const [acceptedTerms, setAcceptedTerms] = useState(false);
+      const [animKey, setAnimKey] = useState(0);
+
+      // Load submissions on mount
+      useEffect(() => {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            setSubmissions(JSON.parse(stored));
+          }
+        } catch (e) {
+          console.error("Failed to load responses", e);
+        }
+      }, []);
+
+      const currentStep = STEPS[currentStepIndex];
+      const isFirstStep = currentStepIndex === 0;
+      const isLastStep = currentStepIndex === STEPS.length - 1;
+
+      const saveSubmission = () => {
+        const newSubmission = {
+          timestamp: new Date().toISOString(),
+          ...answers
+        };
+        
+        const newHistory = [...submissions, newSubmission];
+        setSubmissions(newHistory);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+        setIsSuccess(true);
+      };
+
+      const handleNext = () => {
+        const currentVal = answers[currentStep.id];
+        if (!currentVal || currentVal.trim() === '') {
+          alert("Por favor, preencha este campo para continuar.");
+          return;
+        }
+
+        if (isLastStep) {
+          saveSubmission();
+        } else {
+          setCurrentStepIndex(prev => prev + 1);
+          setAnimKey(prev => prev + 1);
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentStepIndex > 0) {
+          setCurrentStepIndex(prev => prev - 1);
+          setAnimKey(prev => prev + 1);
+        }
+      };
+
+      const handleRestart = () => {
+        setAnswers({});
+        setCurrentStepIndex(0);
+        setIsSuccess(false);
+        setAcceptedTerms(false);
+        setAnimKey(prev => prev + 1);
+      };
+
+      const handleAcceptTerms = () => {
+        setAcceptedTerms(true);
+        setAnimKey(prev => prev + 1);
+      };
+
+      const handleAnswerChange = (val) => {
+        setAnswers(prev => ({ ...prev, [currentStep.id]: val }));
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+          handleNext();
+        }
+      };
+
+      return (
+        <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#151517] text-gray-100 overflow-x-hidden">
+          
+          <main className="w-full max-w-2xl bg-gradient-to-br from-[#262626] via-[#111111] to-[#050505] rounded-[32px] sm:rounded-[40px] shadow-[0_28px_80px_rgba(0,0,0,0.6)] border border-white/5 relative flex flex-col min-h-[550px] mb-20">
+            
+            {!acceptedTerms ? (
+              /* Privacy Policy View (LGPD) */
+              <div className="flex flex-col h-full p-6 sm:p-10 lg:p-12 animate-fade-in">
+                <div className="mb-6 flex items-start justify-between">
+                  <div>
+                    <div className="text-xs font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">
+                      Jornyx · LGPD
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                      Política de Privacidade
+                    </h1>
+                  </div>
+                  <div className="p-3 bg-white/5 rounded-full hidden sm:block">
+                    <Icons.ShieldCheck className="text-gray-400" />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-2 -mr-2 text-gray-300 space-y-6 text-sm sm:text-base mb-6 custom-scrollbar">
+                  <p className="text-gray-400">
+                    A política aplica-se a todos os usuários (Candidatos e Recrutadores) e segue a Lei Geral de Proteção de Dados (LGPD).
+                  </p>
+                  
+                  <div className="space-y-1">
+                    <h3 className="text-white font-medium">Finalidade</h3>
+                    <p className="text-gray-400">Os dados são usados exclusivamente para processos de recrutamento e seleção.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-white font-medium">Compartilhamento</h3>
+                    <ul className="list-disc pl-5 space-y-1 text-gray-400">
+                      <li><strong className="text-gray-300">Candidatos:</strong> Seus dados vão apenas para empresas com vagas compatíveis.</li>
+                      <li><strong className="text-gray-300">Recrutadores:</strong> Dados da vaga são divulgados para a base de talentos.</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-white font-medium">Armazenamento</h3>
+                    <p className="text-gray-400">Os dados ficam guardados por 12 meses.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-white font-medium">Seus Direitos</h3>
+                    <p className="text-gray-400">Você pode pedir para corrigir, atualizar ou excluir seus dados a qualquer momento enviando um e-mail para o suporte.</p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/5">
+                  <Button onClick={handleAcceptTerms} className="w-full justify-center">
+                    Li e concordo
+                  </Button>
+                </div>
+              </div>
+            ) : isSuccess ? (
+              /* Success View */
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-10 animate-fade-in">
+                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
+                  <Icons.CheckCircle2 className="text-green-400 w-10 h-10" />
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-2">Resposta Salva!</h2>
+                <p className="text-gray-400 mb-10 max-w-md">
+                  Os dados foram registrados com sucesso. O visitante já pode retirar o brinde.
+                </p>
+                <Button variant="ghost" onClick={handleRestart} className="gap-3">
+                  <Icons.RotateCcw size={18} />
+                  Iniciar Novo Cadastro
+                </Button>
+              </div>
+            ) : (
+              /* Form View */
+              <div className="flex flex-col h-full p-6 sm:p-10 lg:p-12">
+                
+                {/* Header */}
+                <div className="mb-8">
+                  <div className="text-xs font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">
+                    Jornyx · Pesquisa Feira RH
+                  </div>
+                  <div className="text-sm text-gray-400 tracking-wider uppercase font-medium">
+                    Passo {currentStepIndex + 1} de {STEPS.length}
+                  </div>
+                </div>
+
+                {/* Question Content */}
+                <div key={animKey} className="flex-1 flex flex-col animate-slide-in">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
+                    {currentStep.question}
+                  </h1>
+                  {currentStep.sub && (
+                    <p className="text-gray-400 text-sm sm:text-base mb-8">
+                      {currentStep.sub}
+                    </p>
+                  )}
+
+                  <div className="mt-4 w-full max-w-lg">
+                    {currentStep.type === 'radio' && currentStep.options && (
+                      <div className="flex flex-col gap-3">
+                        {currentStep.options.map(opt => (
+                          <RadioOption
+                            key={opt}
+                            id={`${currentStep.id}-${opt}`}
+                            name={currentStep.id}
+                            value={opt}
+                            label={opt}
+                            checked={answers[currentStep.id] === opt}
+                            onChange={handleAnswerChange}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {(currentStep.type === 'text' || currentStep.type === 'email' || currentStep.type === 'tel') && (
+                      <div className="mt-2">
+                        <TextInput
+                          type={currentStep.type}
+                          value={answers[currentStep.id] || ''}
+                          onChange={(e) => handleAnswerChange(e.target.value)}
+                          placeholder={currentStep.placeholder}
+                          autoFocus
+                          onKeyDown={handleKeyDown}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer / Nav */}
+                <div className="mt-12 pt-6 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
+                  {/* Progress Dots */}
+                  <div className="flex items-center gap-2">
+                    {STEPS.map((_, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          idx === currentStepIndex 
+                            ? 'w-6 bg-orange-500' 
+                            : idx < currentStepIndex 
+                              ? 'w-2 bg-orange-500/50' 
+                              : 'w-2 bg-gray-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      variant="ghost" 
+                      onClick={handlePrev} 
+                      disabled={isFirstStep}
+                      className={isFirstStep ? 'opacity-0 pointer-events-none' : ''}
+                    >
+                      Voltar
+                    </Button>
+                    <Button onClick={handleNext}>
+                      {isLastStep ? 'Finalizar' : 'Próximo'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Persistent Drawer for Admin/Export */}
+          <ResponsesDrawer submissions={submissions} steps={STEPS} />
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
 </html>
